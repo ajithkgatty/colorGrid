@@ -1,0 +1,110 @@
+
+<div class="container">
+    <div id="table_holder" class="tableOne">
+    </div>
+    <div id="color_holder" class="tableTwo">
+        <table id="pick_color_table" border>
+            <tbody>
+                <tr>
+                    <td> <td class='cell_width' style="background: red;" onclick='setColor(this)' </td></td>
+                </tr>
+                <tr>
+                    <td> <td class='cell_width' style="background: blue;" onclick='setColor(this)' </td></td>
+                </tr>
+                <tr>
+                    <td> <td class='cell_width' style="background: green;"  onclick='setColor(this)' </td></td>
+                </tr>
+                <tr>
+                    <td> <td class='cell_width' style="background: black;" onclick='setColor(this)' </td></td>
+                </tr>
+                <tr>
+                    <td> <td class='cell_width' style="background: pink;" onclick='setColor(this)' </td></td>
+                </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+	 $(document).ready(function(){
+		var row = 20;
+		var col = 20;
+        var chosenColor = "";
+
+         var logData = <%= raw @grid_data.to_json %>;
+         console.log(logData);
+
+		 create_dynamic_table(row, col);
+
+         set_colours_on_load(logData);
+	 });
+
+     function set_colours_on_load(data)
+     {
+        data.forEach((element) => {
+        console.log(element);
+        r = parseInt(element.row_index);
+        c = parseInt(element.col_index);
+        col = element.color;
+        $('#dynamic_color_table tbody tr:eq('+ r +') td:eq('+ c +')').css("background-color", col);
+       
+        });
+     }
+
+	function create_dynamic_table(row, col) {
+		
+        //var logData = <%= raw @log_results.to_json %>;
+        var d = $("<table id ='dynamic_color_table' border />");
+        var b = $('<tbody />');
+        for(i = 1; i <= row; i++ )
+        {
+        	// $("<tr>").appendTo(b);
+        	var t = $('<tr>');
+            var e = $('<tr />')
+        	for(j =1; j<=col; j++)
+        	{
+        		
+        		// $("</tr>").appendTo(b);
+        		$("<td class='cell_width' onclick='handle(this)'> </td>").appendTo(t);
+        	}
+            e.append(t);
+        	t.appendTo(b);
+            b.appendTo(d);
+        }
+        d.appendTo('#table_holder');
+    }
+
+    function handle(cell)
+    {
+
+        cell.style.backgroundColor = chosenColor;
+        row_index = cell.parentElement.rowIndex;
+        col_index = cell.cellIndex;
+       
+        // if (cell.style.backgroundColor == "")
+        //     cell.style.backgroundColor = "red";
+        //  else 
+        //     cell.style.backgroundColor = "";
+        value = chosenColor+","+row_index+","+col_index;
+        var request = $.ajax({
+              url: "/store_data",
+              type: "GET",
+              data: {data : value},
+              // dataType: "html",
+              contentType: "application/json"
+            });
+
+            request.done(function(msg) {
+              console.log(msg);
+            });
+
+            request.fail(function(jqXHR, textStatus) {
+              alert( "Request failed: " + textStatus );
+            });
+
+            // }
+    }
+
+    function setColor(cell){
+        chosenColor = cell.style.backgroundColor;
+    }
+</script>
